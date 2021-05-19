@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+    traefik:
+        image: traefik
+        ports:
+            - 443:443
+            - 80:80
+            - 8080:8080
+            - 5672:5672
+            - 1883:1883
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+        command:
+            - "--api.insecure=true"
+            - "--providers.docker=true"
+            - "--providers.docker.exposedbydefault=false"
+            - "--entrypoints.http.address=:80"
+            - "--entrypoints.https.address=:443"
+            - "--entrypoints.rabbitmq.address=:5672"
+            - "--entrypoints.rabbitmq-mqtt.address=:1883"
+
+    consul:
+        image: consul
+        labels:
+            traefik.enable: true
+            traefik.http.routers.consul.rule: Host(`consul.localhost`)
+            traefik.http.routers.consul.entrypoints: http,https
+            traefik.http.routers.consul.service: consul
+            #traefik.http.routers.consul.tls: true
+            traefik.http.services.consul.loadbalancer.server.port: 8500
+    
+    rabbit:
+        image: rabbitmq:management
+        environment:
+            RABBITMQ_ERLANG_COOKIE: "rabbitmq"
+        volumes:
+            - ./enabled_plugins:/etc/rabbitmq/enabled_plugins
+            - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+        labels:
+            traefik.enable: true
+            traefik.http.routers.rabbitmq-ui.rule: Host(`rabbitmq.localhost`)
+            traefik.http.routers.rabbitmq-ui.entrypoints: http,https
+            traefik.http.routers.rabbitmq-ui.service: rabbitmq-ui
+            # traefik.http.routers.rabbitmq-ui.tls: true
+            traefik.http.services.rabbitmq-ui.loadbalancer.server.port: 15672
+            traefik.tcp.routers.rabbitmq.entrypoints: rabbitmq
+            traefik.tcp.routers.rabbitmq.rule: HostSNI(`*`)
+            traefik.tcp.routers.rabbitmq.service: rabbitmq
+            traefik.tcp.services.rabbitmq.loadbalancer.server.port: 5672
+            traefik.tcp.routers.rabbitmq-mqtt.entrypoints: rabbitmq-mqtt
+            traefik.tcp.routers.rabbitmq-mqtt.rule: HostSNI(`*`)
+            traefik.tcp.routers.rabbitmq-mqtt.service: rabbitmq-mqtt
+            traefik.tcp.services.rabbitmq-mqtt.loadbalancer.server.port: 1883
