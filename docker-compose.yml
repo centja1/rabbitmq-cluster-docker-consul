@@ -19,6 +19,12 @@ services:
             - "--entrypoints.https.address=:443"
             - "--entrypoints.rabbitmq.address=:5672"
             - "--entrypoints.rabbitmq-mqtt.address=:1883"
+        labels:
+            traefik.enable: true
+            traefik.http.routers.traefik.entrypoints: http,https
+            traefik.http.routers.traefik.rule: Host(`traefik.localhost`)
+            traefik.http.routers.traefik.service: api@internal
+            #traefik.http.routers.traefik.tls: true
 
     consul:
         image: consul

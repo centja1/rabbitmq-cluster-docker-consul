@@ -1,4 +1,4 @@
-# rabbitmq-cluster-docker-consul
+# RabbitMQ Docker Clustering with Consul & Traefik
 
 From a terminal, run 
 ```sh
@@ -6,7 +6,7 @@ docker-compose up -d --scale rabbit=xxxx
 ```
 where xxxx is an odd number of RabbitMQ instances to start.
 
-You can then go to `http://rabbitmq.localhost` and see the cluster, `http://consul.localhost` to see the services registering with the Consul instance, and `http://localhost:8080` to see the Traefik dashboard.
+You can then go to `http://rabbitmq.localhost` and see the cluster, `http://consul.localhost` to see the services registering with the Consul instance, and `http://traefik.localhost` to see the Traefik dashboard.
 
 
 # Sending and receiving messages
